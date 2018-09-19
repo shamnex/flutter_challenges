@@ -14,4 +14,4 @@ Design made by **Jae-seong,**
 ### [restaurant app](https://github.com/shamnex/flutter_challenges/tree/master/02_ramen_restaurant) (50% Done)
 Designed by **Nina Maffey**
 
-[<img src="https://github.com/shamnex/flutter_challenges/blob/master/gifs/restaurant.gif">](https://dribbble.com/shots/3861169-iPhone-X-City-Guides-Concept)
+[<img src="https://github.com/shamnex/flutter_challenges/blob/master/gifs/restaurant.gif">](https://www.uplabs.com/posts/today-s-special-ramen-restaurant-app)
