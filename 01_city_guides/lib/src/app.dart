@@ -3,7 +3,6 @@ import 'package:challenges/src/screens/destination/destination_screen.dart';
 import 'package:challenges/src/screens/story/stories_screen.dart';
 import 'package:challenges/src/widgets/route_animations.dart';
 import "package:flutter/material.dart";
-import 'package:flutter_villains/villain.dart';
 import 'screens/home/home_screen.dart';
 import 'package:challenges/src/screens/home/tabs/search_screen.dart';
 
@@ -11,7 +10,6 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return MaterialApp(
-      navigatorObservers: [new VillainTransitionObserver()],
       theme: ThemeData(
         iconTheme: IconThemeData(color: Colors.grey),
         primaryColor:AppColors.darkGrey,
