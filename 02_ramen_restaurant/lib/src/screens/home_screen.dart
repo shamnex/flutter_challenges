@@ -1,7 +1,44 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:ramen_restaurant/src/data/constants.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  @override
+  HomeScreenState createState() {
+    return new HomeScreenState();
+  }
+}
+
+class HomeScreenState extends State<HomeScreen> {
+  PageController _pageViewController;
+  int currentpage = 0;
+
+  // StreamController<double> _scaleCard = StreamController<double>();
+
+  // Stream<double> get getStream => _scaleCard.stream;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageViewController = new PageController(
+      initialPage: currentpage,
+      keepPage: true,
+      viewportFraction: 0.7,
+    );
+  }
+
+  final List<ItemCard> _cards = [
+    ItemCard(),
+    ItemCard(),
+    ItemCard(),
+  ];
+
+  dispose() {
+    // _scaleCard.close();
+    super.dispose();
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -36,9 +73,36 @@ class HomeScreen extends StatelessWidget {
             ),
           ]),
 
-          Center(
-            child: new ItemCard(),
-          ),
+          PageView.builder(
+              controller: _pageViewController,
+              itemCount: _cards.length,
+              onPageChanged: (int value) {
+                setState(() {
+                  currentpage = value;
+                });
+              },
+              itemBuilder: (BuildContext context, int index) {
+
+                return AnimatedBuilder(
+                  animation: _pageViewController,
+                  child: GestureDetector(
+                    onTap: null,
+                    child: _cards[index],
+                  ),
+                  builder: (ctx, child) {
+                    double value = 1.0;
+
+                    if (_pageViewController.position.haveDimensions) {
+                      value = _pageViewController.page - index;
+                      value = (1 - (value.abs() * .5)).clamp(0.0, 1.0);
+                    }
+                   return new Transform.scale(
+                     scale: Curves.easeOut.transform(value) * 1 +0.1,
+                     child: child,
+                   );     
+                                 },
+                );
+              }),
         ],
       ),
     );
@@ -52,15 +116,32 @@ class ItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Transform(
+      transform: Matrix4.identity()..translate(0.0, 30.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          buildCard(context),
+          Transform(
+            child: buildButton(),
+            transform: Matrix4.identity()..translate(0.0, -30.0),
+          ),
+          //buttton
+        ],
+      ),
+    );
+  }
+
+  Widget buildCard(BuildContext context) {
     return Stack(
-      overflow: Overflow.visible,
-      alignment: Alignment.topCenter,
-      children: [
+      alignment: Alignment.center,
+      children: <Widget>[
         //===============================
         //shadow
         //===============================
         Container(
           padding: EdgeInsets.only(top: 60.0),
+          margin: EdgeInsets.symmetric(horizontal: 10.0),
           height: MediaQuery.of(context).size.height / 2,
           width: MediaQuery.of(context).size.width / 1.9,
           decoration: BoxDecoration(
@@ -75,14 +156,99 @@ class ItemCard extends StatelessWidget {
             ],
           ),
         ),
+
         //====================================================
         //Card
         //=================================================
-        buildCard(context),
-        Positioned(
-          // transform: Matrix4.identity()..translate(0.0, 30.0),
-          child: buildButton(),
-          bottom: -30.0,
+
+        Container(
+          padding: EdgeInsets.only(top: 60.0),
+          height: MediaQuery.of(context).size.height / 2,
+
+          // width: MediaQuery.of(context).size.width / 1.3,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                blurRadius: 10.0,
+              )
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              Container(
+                width: 150.0,
+                child: Column(
+                  children: <Widget>[
+                    Text(
+                      "JOLLOF",
+                      softWrap: true,
+                      maxLines: 2,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 22.0, height: 1.5),
+                    ),
+                    Text(
+                      "RICE",
+                      softWrap: true,
+                      maxLines: 2,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 22.0, height: 1.5),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                width: 90.0,
+                alignment: Alignment.center,
+                padding: EdgeInsets.symmetric(
+                  vertical: 7.0,
+                  horizontal: 20.0,
+                ),
+                decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(30.0)),
+                child: Text(
+                  "10",
+                  style: TextStyle(fontSize: 22.0, color: Colors.white),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  IconButton(
+                    icon: Icon(Icons.remove),
+                    onPressed: () {},
+                  ),
+                  Container(
+                    alignment: Alignment.center,
+                    height: 60.0,
+                    width: 85.0,
+                    margin: EdgeInsets.all(20.0),
+                    padding: EdgeInsets.symmetric(
+                      vertical: 7.0,
+                      horizontal: 20.0,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4.0),
+                      border: Border.all(color: Colors.grey, width: 2.0),
+                      color: Colors.transparent,
+                    ),
+                    child: Text(
+                      "100",
+                      style: TextStyle(
+                          fontSize: 18.0, color: Colors.grey.shade900),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.add),
+                    onPressed: () {},
+                  )
+                ],
+              ),
+            ],
+          ),
         ),
 
         Transform(
@@ -90,99 +256,9 @@ class ItemCard extends StatelessWidget {
             "assets/images/jollof.png",
             height: 100.0,
           ),
-          transform: Matrix4.identity()..translate(0.0, -50.0),
+          transform: Matrix4.identity()..translate(0.0, -200.0),
         ),
-        //buttton
       ],
-    );
-  }
-
-  Widget buildCard(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(top: 60.0),
-      height: MediaQuery.of(context).size.height / 2,
-      width: MediaQuery.of(context).size.width / 1.3,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 10.0,
-          )
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          Container(
-            width: 150.0,
-            child: Column(
-              children: <Widget>[
-                Text(
-                  "JOLLOF",
-                  softWrap: true,
-                  maxLines: 2,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 22.0, height: 1.5),
-                ),
-                Text(
-                  "RICE",
-                  softWrap: true,
-                  maxLines: 2,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 22.0, height: 1.5),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            width: 90.0,
-            alignment: Alignment.center,
-            padding: EdgeInsets.symmetric(
-              vertical: 7.0,
-              horizontal: 20.0,
-            ),
-            decoration: BoxDecoration(
-                color: Colors.black, borderRadius: BorderRadius.circular(30.0)),
-            child: Text(
-              "10",
-              style: TextStyle(fontSize: 22.0, color: Colors.white),
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              IconButton(
-                icon: Icon(Icons.remove),
-                onPressed: () {},
-              ),
-              Container(
-                alignment: Alignment.center,
-                height: 60.0,
-                width: 85.0,
-                margin: EdgeInsets.all(20.0),
-                padding: EdgeInsets.symmetric(
-                  vertical: 7.0,
-                  horizontal: 20.0,
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(4.0),
-                  border: Border.all(color: Colors.grey, width: 2.0),
-                  color: Colors.transparent,
-                ),
-                child: Text(
-                  "100",
-                  style: TextStyle(fontSize: 18.0, color: Colors.grey.shade900),
-                ),
-              ),
-              IconButton(
-                icon: Icon(Icons.add),
-                onPressed: () {},
-              )
-            ],
-          ),
-        ],
-      ),
     );
   }
 
