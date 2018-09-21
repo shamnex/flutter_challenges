@@ -3,16 +3,15 @@ import 'package:flutter/material.dart';
 
 class CartBloc {
   StreamController<int> _items = StreamController<int>.broadcast();
+  int _total = 0;
+
   //getters
   Stream<int> get items => _items.stream;
-  int _total = 0;
   int get total => _total;
-
+  //getters
   Function(int) get addItem => _items.sink.add;
 
   CartBloc() {
-    addItem(0);
-
     _items.stream.listen((onData) {
       _total += onData;
     });

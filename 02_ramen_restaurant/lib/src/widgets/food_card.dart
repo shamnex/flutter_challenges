@@ -3,8 +3,6 @@ import 'package:ramen_restaurant/src/data/constants.dart';
 import 'package:ramen_restaurant/src/models/food.dart';
 
 class FoodCard extends StatefulWidget {
-  // final VoidCallback onQuantityIncrement;
-  // final VoidCallback onQuantityDecrement;
   final Function(int) onAddToCart;
   final Food food;
 
@@ -20,7 +18,10 @@ class FoodCard extends StatefulWidget {
   }
 }
 
-class FoodCardState extends State<FoodCard> {
+class FoodCardState extends State<FoodCard> with TickerProviderStateMixin {
+  AnimationController _animationController;
+  Animation<double> _scale;
+  Animation<double> _translate;
   int _quantity;
 
   _addQuantity() {
@@ -40,6 +41,39 @@ class FoodCardState extends State<FoodCard> {
   initState() {
     super.initState();
     _quantity = 0;
+    _animationController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 500))
+          ..addStatusListener((status) {
+            print(status);
+          });
+
+    _scale = Tween(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Interval(
+          0.0,
+          1.0,
+        ),
+        reverseCurve: Interval(
+          0.0,
+          1.0,
+        ),
+      ),
+    );
+
+    _translate = Tween(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Interval(
+          0.0,
+          1.0,
+        ),
+        reverseCurve: Interval(
+          0.0,
+          1.0,
+        ),
+      ),
+    );
   }
 
   @override
@@ -62,11 +96,13 @@ class FoodCardState extends State<FoodCard> {
 
   Widget buildCard(BuildContext context) {
     return Stack(
+      overflow: Overflow.visible,
       alignment: Alignment.center,
       children: <Widget>[
         //=================================================
         //shadow
-        //===============================================
+        //=================================================
+
         Container(
           padding: EdgeInsets.only(top: 60.0),
           margin: EdgeInsets.symmetric(horizontal: 10.0),
@@ -87,83 +123,88 @@ class FoodCardState extends State<FoodCard> {
         //====================================================
         //Card
         //=================================================
-        Container(
-          height: MediaQuery.of(context).size.height / 2,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                blurRadius: 10.0,
-              )
-            ],
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              Container(
-                width: 120.0,
-                child: Column(
+        ConstrainedBox(
+          constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height / 2,
+              minHeight: 320.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.1),
+                  blurRadius: 10.0,
+                )
+              ],
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                Container(
+                  width: 120.0,
+                  margin: EdgeInsets.only(top: 20.0),
+                  child: Column(
+                    children: <Widget>[
+                      Text(
+                        widget.food.name.toUpperCase(),
+                        softWrap: true,
+                        maxLines: 2,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 22.0, height: 1.5),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: 90.0,
+                  alignment: Alignment.center,
+                  padding: EdgeInsets.symmetric(
+                    vertical: 10.0,
+                    horizontal: 20.0,
+                  ),
+                  decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(30.0)),
+                  child: Text(
+                    "${widget.food.price}",
+                    style: TextStyle(fontSize: 22.0, color: Colors.white),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Text(
-                      widget.food.name.toUpperCase(),
-                      softWrap: true,
-                      maxLines: 2,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 22.0, height: 1.5),
+                    IconButton(
+                      icon: Icon(Icons.remove),
+                      onPressed: _removeQuantity,
                     ),
+                    Container(
+                      alignment: Alignment.center,
+                      height: 50.0,
+                      width: 80.0,
+                      margin: EdgeInsets.all(10.0),
+                      padding: EdgeInsets.symmetric(
+                        vertical: 5.0,
+                        horizontal: 20.0,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4.0),
+                        border: Border.all(color: Colors.grey, width: 2.0),
+                        color: Colors.transparent,
+                      ),
+                      child: Text(
+                        _quantity.toString(),
+                        style: TextStyle(
+                            fontSize: 17.0, color: Colors.grey.shade900),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.add),
+                      onPressed: _addQuantity,
+                    )
                   ],
                 ),
-              ),
-              Container(
-                width: 90.0,
-                alignment: Alignment.center,
-                padding: EdgeInsets.symmetric(
-                  vertical: 7.0,
-                  horizontal: 20.0,
-                ),
-                decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(30.0)),
-                child: Text(
-                  "${widget.food.price}",
-                  style: TextStyle(fontSize: 22.0, color: Colors.white),
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  IconButton(
-                    icon: Icon(Icons.remove),
-                    onPressed: _removeQuantity,
-                  ),
-                  Container(
-                    alignment: Alignment.center,
-                    height: 50.0,
-                    width: 80.0,
-                    margin: EdgeInsets.all(10.0),
-                    padding: EdgeInsets.symmetric(
-                      vertical: 5.0,
-                      horizontal: 20.0,
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4.0),
-                      border: Border.all(color: Colors.grey, width: 2.0),
-                      color: Colors.transparent,
-                    ),
-                    child: Text(
-                      _quantity.toString(),
-                      style: TextStyle(
-                          fontSize: 17.0, color: Colors.grey.shade900),
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.add),
-                    onPressed: _addQuantity,
-                  )
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
         ),
 
@@ -178,31 +219,50 @@ class FoodCardState extends State<FoodCard> {
           ),
           transform: Matrix4.identity()..translate(0.0, -200.0),
         ),
+
+        // Transform(
+        //   child: Container(
+        //     height: 60.0,
+        //     width: 80.0,
+        //     decoration: BoxDecoration(
+        //       shape: BoxShape.circle,
+        //       color: AppColors.yellow,
+        //     ),
+        //   ),
+        //   transform: Matrix4.identity()..translate(0.0, - MediaQuery.of(context).size.width/1.5),
+        // ),
       ],
     );
   }
 
   Widget buildButton() {
-    return InkWell(
-      splashColor: Colors.red,
-      onTap: _quantity > 0? () {
-        widget.onAddToCart(_quantity);
-        setState(() {
-          _quantity = 0;
-        });
-      }: null,
-      child: Container(
-        height: 60.0,
-        width: 80.0,
-        decoration: BoxDecoration(
-          color: _quantity > 0 ? AppColors.yellow : AppColors.darkGrey,
-          borderRadius: BorderRadius.circular(4.0),
+    return Stack(
+      children: <Widget>[
+        InkWell(
+          splashColor: Colors.red,
+          onTap: _quantity > 0
+              ? () {
+                  widget.onAddToCart(_quantity);
+
+                  setState(() {
+                    _quantity = 0;
+                  });
+                }
+              : null,
+          child: Container(
+            height: 60.0,
+            width: 80.0,
+            decoration: BoxDecoration(
+              color: _quantity > 0 ? AppColors.yellow : AppColors.darkGrey,
+              borderRadius: BorderRadius.circular(4.0),
+            ),
+            child: Icon(
+              Icons.shopping_cart,
+              color: Colors.white,
+            ),
+          ),
         ),
-        child: Icon(
-          Icons.shopping_cart,
-          color: Colors.white,
-        ),
-      ),
+      ],
     );
   }
 }

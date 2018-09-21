@@ -10,7 +10,7 @@ class Food {
   static List<Food> getAllFoods() {
     return [
       Food(
-        name: "Jollof Rice",
+        name: "TuwoShinkafa Rice",
         image: Images.jollof,
         price: 100,
       ),
@@ -25,14 +25,14 @@ class Food {
         price: 100,
       ),
       Food(
-        name: "Jollof",
+        name: "Chinese Something",
         image: Images.jollof,
-        price: 100,
+        price: 25,
       ),
       Food(
-        name: "Jollof Rice",
+        name: "Oyibo Rice",
         image: Images.jollof,
-        price: 100,
+        price: 60,
       ),
     ];
   }

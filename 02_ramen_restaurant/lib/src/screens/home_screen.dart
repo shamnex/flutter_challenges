@@ -11,18 +11,51 @@ class HomeScreen extends StatefulWidget {
   }
 }
 
-class HomeScreenState extends State<HomeScreen> {
+class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   PageController _pageViewController;
-  int currentpage = 0;
+
+  AnimationController _animationController;
+  Animation<double> _opacity;
+
+  int _currentpage;
+  Color _bgColor;
 
   @override
   void initState() {
     super.initState();
+
+    _animationController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 500))
+          ..addStatusListener((status) {
+            print(status);
+          });
+
+    _opacity = Tween(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Interval(
+          0.0,
+          1.0,
+        ),
+        reverseCurve: Interval(
+          0.0,
+          1.0,
+        ),
+      ),
+    );
+
+    _animationController.forward();
+
+    _currentpage = 0;
     _pageViewController = PageController(
-      initialPage: currentpage,
+      initialPage: 0,
       keepPage: true,
       viewportFraction: 0.7,
-    );
+    )..addListener(() {});
+
+    // _animationController.forward();
+
+    _bgColor = BGColors.all[_currentpage];
   }
 
   final List<Food> _foods = Food.getAllFoods();
@@ -37,29 +70,37 @@ class HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(),
-        backgroundColor: Color(0xFFf2e8da),
+        backgroundColor: _bgColor,
         elevation: 0.0,
         centerTitle: true,
         actions: <Widget>[
           Stack(
+            alignment: Alignment.center,
             children: <Widget>[
               Container(
                 margin: const EdgeInsets.only(right: 16.0),
                 child: Icon(Icons.shopping_cart),
               ),
-              StreamBuilder(
-                stream: cartBloc.items,
-                builder: (ctx, AsyncSnapshot<int> snapshot) {
-                    print(snapshot.data);
-                  if (snapshot.hasData) {
-                    return Container(
-                      decoration: BoxDecoration(color: AppColors.yellow),
-                      margin: const EdgeInsets.only(right: 16.0),
-                      child: Text(cartBloc.total.toString().toUpperCase(),style: TextStyle(color: Colors.white,)),
-                    );
-                  }
-                  return Container();
-                },
+              Positioned(
+                top: 6.0,
+                right: 0.0,
+                child: StreamBuilder(
+                  stream: cartBloc.items,
+                  builder: (ctx, AsyncSnapshot<int> snapshot) {
+                    if (snapshot.hasData) {
+                      return Container(
+                        padding: EdgeInsets.all(4.0),
+                        decoration: BoxDecoration(
+                            shape: BoxShape.circle, color: AppColors.yellow),
+                        margin: const EdgeInsets.only(right: 10.0),
+                        child: Text(cartBloc.total.toString().toUpperCase(),
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 14.0)),
+                      );
+                    }
+                    return Container();
+                  },
+                ),
               ),
             ],
           ),
@@ -73,10 +114,18 @@ class HomeScreenState extends State<HomeScreen> {
         children: <Widget>[
           //main background
           Column(children: [
-            Expanded(
-              child: Container(
-                color: Color(0xFFf2e8da),
-              ),
+            AnimatedBuilder(
+              animation: _opacity,
+              builder: (BuildContext ctx, Widget child) {
+                return Expanded(
+                  child: Opacity(
+                    opacity: _opacity.value,
+                    child: Container(
+                      color: _bgColor,
+                    ),
+                  ),
+                );
+              },
             ),
             Expanded(
               child: Container(
@@ -88,9 +137,10 @@ class HomeScreenState extends State<HomeScreen> {
           PageView.builder(
             controller: _pageViewController,
             itemCount: _foods.length,
-            onPageChanged: (int value) {
+            onPageChanged: (int pageNumber) {
               setState(() {
-                currentpage = value;
+                _currentpage = pageNumber;
+                _bgColor = BGColors.all[pageNumber];
               });
             },
             itemBuilder: (BuildContext context, int index) {
@@ -106,7 +156,7 @@ class HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                 ),
-                builder: (ctx, child) {
+                builder: (BuildContext ctx, Widget child) {
                   double value = 1.0;
 
                   if (_pageViewController.position.haveDimensions) {
@@ -122,6 +172,7 @@ class HomeScreenState extends State<HomeScreen> {
               );
             },
           ),
+
         ],
       ),
     );
