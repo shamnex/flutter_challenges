@@ -13,10 +13,14 @@ class BGColors {
     const Color(0xFFefefe7),
     const Color(0xFFecb34c),
     const Color(0xFFd2da75),
-    Color(0xFFf7f7f7),
+   const Color(0xFFf7f7f7),
   ];
 }
 
 class Images {
   static const jollof = "assets/images/jollof.png";
+  static const white = "assets/images/white.png";
+  static const beans = "assets/images/beans.png";
+  static const indomie = "assets/images/indomie.png";
+  static const amala = "assets/images/ewedu.png";
 }

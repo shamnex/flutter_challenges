@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ramen_restaurant/src/data/constants.dart';
 import 'package:ramen_restaurant/src/models/food.dart';
+import 'package:ramen_restaurant/src/widgets/bounce_in_animation.dart';
 
 class FoodCard extends StatefulWidget {
   final Function(int) onAddToCart;
@@ -18,10 +19,7 @@ class FoodCard extends StatefulWidget {
   }
 }
 
-class FoodCardState extends State<FoodCard> with TickerProviderStateMixin {
-  AnimationController _animationController;
-  Animation<double> _scale;
-  Animation<double> _translate;
+class FoodCardState extends State<FoodCard> {
   int _quantity;
 
   _addQuantity() {
@@ -41,39 +39,12 @@ class FoodCardState extends State<FoodCard> with TickerProviderStateMixin {
   initState() {
     super.initState();
     _quantity = 0;
-    _animationController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 500))
-          ..addStatusListener((status) {
-            print(status);
-          });
+  }
 
-    _scale = Tween(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Interval(
-          0.0,
-          1.0,
-        ),
-        reverseCurve: Interval(
-          0.0,
-          1.0,
-        ),
-      ),
-    );
-
-    _translate = Tween(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Interval(
-          0.0,
-          1.0,
-        ),
-        reverseCurve: Interval(
-          0.0,
-          1.0,
-        ),
-      ),
-    );
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
   }
 
   @override
@@ -96,17 +67,16 @@ class FoodCardState extends State<FoodCard> with TickerProviderStateMixin {
 
   Widget buildCard(BuildContext context) {
     return Stack(
-      overflow: Overflow.visible,
       alignment: Alignment.center,
+      overflow: Overflow.visible,
       children: <Widget>[
         //=================================================
         //shadow
         //=================================================
 
         Container(
-          padding: EdgeInsets.only(top: 60.0),
           margin: EdgeInsets.symmetric(horizontal: 10.0),
-          height: MediaQuery.of(context).size.height / 2,
+          height: 360.0,
           width: MediaQuery.of(context).size.width / 1.9,
           decoration: BoxDecoration(
             color: Colors.transparent,
@@ -125,8 +95,9 @@ class FoodCardState extends State<FoodCard> with TickerProviderStateMixin {
         //=================================================
         ConstrainedBox(
           constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height / 2,
-              minHeight: 320.0),
+            maxHeight: 360.0,
+            minHeight: 360.0,
+          ),
           child: Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -141,8 +112,7 @@ class FoodCardState extends State<FoodCard> with TickerProviderStateMixin {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 Container(
-                  width: 120.0,
-                  margin: EdgeInsets.only(top: 20.0),
+                  width: 160.0,
                   child: Column(
                     children: <Widget>[
                       Text(
@@ -150,7 +120,7 @@ class FoodCardState extends State<FoodCard> with TickerProviderStateMixin {
                         softWrap: true,
                         maxLines: 2,
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 22.0, height: 1.5),
+                        style: TextStyle(fontSize: 22.0, height: 1.2),
                       ),
                     ],
                   ),
@@ -160,14 +130,14 @@ class FoodCardState extends State<FoodCard> with TickerProviderStateMixin {
                   alignment: Alignment.center,
                   padding: EdgeInsets.symmetric(
                     vertical: 10.0,
-                    horizontal: 20.0,
+                    horizontal: 15.0,
                   ),
                   decoration: BoxDecoration(
                       color: Colors.black,
                       borderRadius: BorderRadius.circular(30.0)),
                   child: Text(
-                    "${widget.food.price}",
-                    style: TextStyle(fontSize: 22.0, color: Colors.white),
+                    "₦${ widget.food.price}",
+                    style: TextStyle(fontSize: 17.0, color: Colors.white),
                   ),
                 ),
                 Row(
@@ -181,7 +151,7 @@ class FoodCardState extends State<FoodCard> with TickerProviderStateMixin {
                       alignment: Alignment.center,
                       height: 50.0,
                       width: 80.0,
-                      margin: EdgeInsets.all(10.0),
+                      // margin: EdgeInsets.all(10.0),
                       padding: EdgeInsets.symmetric(
                         vertical: 5.0,
                         horizontal: 20.0,
@@ -208,7 +178,7 @@ class FoodCardState extends State<FoodCard> with TickerProviderStateMixin {
           ),
         ),
 
-        //====================================================
+        //=================================================
         //image
         //=================================================
 
@@ -217,31 +187,19 @@ class FoodCardState extends State<FoodCard> with TickerProviderStateMixin {
             widget.food.image,
             height: 100.0,
           ),
-          transform: Matrix4.identity()..translate(0.0, -200.0),
+          transform: Matrix4.identity()..translate(0.0, -180.0),
         ),
-
-        // Transform(
-        //   child: Container(
-        //     height: 60.0,
-        //     width: 80.0,
-        //     decoration: BoxDecoration(
-        //       shape: BoxShape.circle,
-        //       color: AppColors.yellow,
-        //     ),
-        //   ),
-        //   transform: Matrix4.identity()..translate(0.0, - MediaQuery.of(context).size.width/1.5),
-        // ),
       ],
     );
   }
 
   Widget buildButton() {
     return Stack(
+      alignment: Alignment.center,
       children: <Widget>[
         InkWell(
-          splashColor: Colors.red,
           onTap: _quantity > 0
-              ? () {
+              ? () async {
                   widget.onAddToCart(_quantity);
 
                   setState(() {
@@ -249,18 +207,33 @@ class FoodCardState extends State<FoodCard> with TickerProviderStateMixin {
                   });
                 }
               : null,
-          child: Container(
-            height: 60.0,
-            width: 80.0,
-            decoration: BoxDecoration(
-              color: _quantity > 0 ? AppColors.yellow : AppColors.darkGrey,
-              borderRadius: BorderRadius.circular(4.0),
-            ),
-            child: Icon(
-              Icons.shopping_cart,
-              color: Colors.white,
-            ),
-          ),
+          child: _quantity > 0
+              ? BounceInAnimation(
+                  child: Container(
+                    height: 60.0,
+                    width: 80.0,
+                    decoration: BoxDecoration(
+                      color: AppColors.yellow,
+                      borderRadius: BorderRadius.circular(4.0),
+                    ),
+                    child: Icon(
+                      Icons.shopping_cart,
+                      color: Colors.white,
+                    ),
+                  ),
+                )
+              : Container(
+                  height: 60.0,
+                  width: 80.0,
+                  decoration: BoxDecoration(
+                    color: AppColors.darkGrey,
+                    borderRadius: BorderRadius.circular(4.0),
+                  ),
+                  child: Icon(
+                    Icons.shopping_cart,
+                    color: Colors.white,
+                  ),
+                ),
         ),
       ],
     );
