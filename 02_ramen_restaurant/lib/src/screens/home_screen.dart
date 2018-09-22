@@ -1,7 +1,10 @@
+
 import 'package:flutter/material.dart';
-import 'package:ramen_restaurant/src/blocs/cart_bloc.dart';
+import 'package:ramen_restaurant/src/blocs/app_bloc.dart';
 import 'package:ramen_restaurant/src/data/constants.dart';
 import 'package:ramen_restaurant/src/models/food.dart';
+import 'package:ramen_restaurant/src/widgets/add_to_cart_animation.dart';
+import 'package:ramen_restaurant/src/widgets/bounce_in_animation.dart';
 import 'package:ramen_restaurant/src/widgets/food_card.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -12,13 +15,23 @@ class HomeScreen extends StatefulWidget {
 }
 
 class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-  PageController _pageViewController;
+  final foodCardHeight = 360.0; // retrieved from food_card.dart
+  double screenHeight;
+  double screenWidth;
+
+  double yStartPosition;
+  double yEndPosition;
+
+  double xStartPosition;
+  double xEndPosition;
+
+  PageController _pageViewController = PageController(
+    initialPage: 0,
+    keepPage: false,
+    viewportFraction: 0.7,
+  );
 
   AnimationController _animationController;
-  Animation<double> _opacity;
-
-  int _currentpage;
-  Color _bgColor;
 
   @override
   void initState() {
@@ -26,51 +39,72 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     _animationController =
         AnimationController(vsync: this, duration: Duration(milliseconds: 500))
-          ..addStatusListener((status) {
-            print(status);
+          ..addStatusListener((AnimationStatus status) {
+            if (status == AnimationStatus.completed) {
+              _animationController.reset();
+            }
           });
-
-    _opacity = Tween(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Interval(
-          0.0,
-          1.0,
-        ),
-        reverseCurve: Interval(
-          0.0,
-          1.0,
-        ),
-      ),
-    );
-
-    _animationController.forward();
-
-    _currentpage = 0;
-    _pageViewController = PageController(
-      initialPage: 0,
-      keepPage: true,
-      viewportFraction: 0.7,
-    )..addListener(() {});
-
-    // _animationController.forward();
-
-    _bgColor = BGColors.all[_currentpage];
   }
 
   final List<Food> _foods = Food.getAllFoods();
 
   dispose() {
+    _animationController.dispose();
+    _pageViewController.dispose();
     super.dispose();
   }
 
   Widget build(BuildContext context) {
-    final cartBloc = CartProvider.of(context);
+    final bloc = AppProvider.of(context);
+    screenHeight = MediaQuery.of(context).size.height;
+    screenWidth = MediaQuery.of(context).size.width;
 
+    yStartPosition = screenHeight - foodCardHeight / 2;
+    xStartPosition = screenWidth / 2 - 30.0;
+
+    yEndPosition = 18.0 + 10.0;
+    xEndPosition = screenWidth - 18.0 - 10.0;
+
+    return Stack(
+      children: <Widget>[
+        Column(children: [
+          Expanded(
+            child: StreamBuilder(
+              stream: bloc.currentpage,
+              builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+                if (!snapshot.hasData) {
+                  return Container(
+                    color: BGColors.all[0],
+                  );
+                }
+                return Container(
+                  color: BGColors.all[snapshot.data],
+                );
+              },
+            ),
+          ),
+          Expanded(
+            child: Container(
+              color: Color(0xFFffffff),
+            ),
+          ),
+        ]),
+        _buildScaffold(context, bloc),
+        AddToCartAnimation(
+          begin: Offset(xStartPosition, yStartPosition),
+          end: Offset(xEndPosition, yEndPosition),
+          animationController: _animationController,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildScaffold(context, AppBloc bloc) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         leading: BackButton(),
-        backgroundColor: _bgColor,
+        backgroundColor: Colors.transparent,
         elevation: 0.0,
         centerTitle: true,
         actions: <Widget>[
@@ -85,17 +119,22 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 top: 6.0,
                 right: 0.0,
                 child: StreamBuilder(
-                  stream: cartBloc.items,
+                  stream: bloc.itemsInCart,
                   builder: (ctx, AsyncSnapshot<int> snapshot) {
                     if (snapshot.hasData) {
-                      return Container(
-                        padding: EdgeInsets.all(4.0),
-                        decoration: BoxDecoration(
-                            shape: BoxShape.circle, color: AppColors.yellow),
-                        margin: const EdgeInsets.only(right: 10.0),
-                        child: Text(cartBloc.total.toString().toUpperCase(),
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 14.0)),
+                      return BounceInAnimation(
+                        replayable: true,
+                        child: Container(
+                          alignment: Alignment.center,
+                          width: 18.0,
+                          height: 18.0,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle, color: AppColors.yellow),
+                          margin: const EdgeInsets.only(right: 10.0),
+                          child: Text(bloc.total.toString().toUpperCase(),
+                              style: TextStyle(
+                                  color: Colors.white, fontSize: 14.0)),
+                        ),
                       );
                     }
                     return Container();
@@ -113,66 +152,46 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       body: Stack(
         children: <Widget>[
           //main background
-          Column(children: [
-            AnimatedBuilder(
-              animation: _opacity,
-              builder: (BuildContext ctx, Widget child) {
-                return Expanded(
-                  child: Opacity(
-                    opacity: _opacity.value,
-                    child: Container(
-                      color: _bgColor,
+          StreamBuilder(
+            stream: bloc.currentpage,
+            builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+              return PageView.builder(
+                controller: _pageViewController,
+                itemCount: _foods.length,
+                onPageChanged: (int pageNumber) =>
+                    bloc.setCurrentPage(pageNumber),
+                itemBuilder: (BuildContext context, int index) {
+                  final Food currentFood = _foods[index];
+                  return AnimatedBuilder(
+                    animation: _pageViewController,
+                    child: GestureDetector(
+                      onTap: null,
+                      child: FoodCard(
+                        food: currentFood,
+                        onAddToCart: (int quantity) async {
+                          await _animationController.forward();
+                          bloc.addItemsToCart(quantity);
+                        },
+                      ),
                     ),
-                  ),
-                );
-              },
-            ),
-            Expanded(
-              child: Container(
-                color: Color(0xFFffffff),
-              ),
-            ),
-          ]),
+                    builder: (BuildContext ctx, Widget child) {
+                      double value = 1.0;
 
-          PageView.builder(
-            controller: _pageViewController,
-            itemCount: _foods.length,
-            onPageChanged: (int pageNumber) {
-              setState(() {
-                _currentpage = pageNumber;
-                _bgColor = BGColors.all[pageNumber];
-              });
-            },
-            itemBuilder: (BuildContext context, int index) {
-              final Food currentFood = _foods[index];
-              return AnimatedBuilder(
-                animation: _pageViewController,
-                child: GestureDetector(
-                  onTap: null,
-                  child: FoodCard(
-                    food: currentFood,
-                    onAddToCart: (int quantity) {
-                      cartBloc.addItem(quantity);
+                      if (_pageViewController.position.haveDimensions) {
+                        value = _pageViewController.page - index;
+                        value = (1 - (value.abs() * .5)).clamp(0.0, 1.0);
+                      }
+                      return new Transform.scale(
+                        // scale: 1.0,
+                        scale: Curves.easeOut.transform(value) * 1 + 0.08,
+                        child: child,
+                      );
                     },
-                  ),
-                ),
-                builder: (BuildContext ctx, Widget child) {
-                  double value = 1.0;
-
-                  if (_pageViewController.position.haveDimensions) {
-                    value = _pageViewController.page - index;
-                    value = (1 - (value.abs() * .5)).clamp(0.0, 1.0);
-                  }
-                  return new Transform.scale(
-                    // scale: 1.0,
-                    scale: Curves.easeOut.transform(value) * 1 + 0.08,
-                    child: child,
                   );
                 },
               );
             },
           ),
-
         ],
       ),
     );

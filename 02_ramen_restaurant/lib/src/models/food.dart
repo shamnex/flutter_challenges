@@ -10,29 +10,29 @@ class Food {
   static List<Food> getAllFoods() {
     return [
       Food(
-        name: "TuwoShinkafa Rice",
-        image: Images.jollof,
-        price: 100,
+        name: "White Rice and Dodo",
+        image: Images.white,
+        price: 1500,
       ),
       Food(
         name: "Jollof Rice",
         image: Images.jollof,
-        price: 100,
+        price: 2000,
       ),
       Food(
-        name: "White Rice and Stew",
-        image: Images.jollof,
-        price: 100,
+        name: "Beans and Dodo",
+        image: Images.beans,
+        price: 1500,
       ),
       Food(
-        name: "Chinese Something",
-        image: Images.jollof,
-        price: 25,
+        name: "Indomie Noodles",
+        image: Images.indomie,
+        price: 2500,
       ),
       Food(
-        name: "Oyibo Rice",
-        image: Images.jollof,
-        price: 60,
+        name: "Amala and Ewedu",
+        image: Images.amala,
+        price: 3500,
       ),
     ];
   }

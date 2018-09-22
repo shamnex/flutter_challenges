@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ramen_restaurant/src/blocs/cart_bloc.dart';
+import 'package:ramen_restaurant/src/blocs/app_bloc.dart';
 import 'package:ramen_restaurant/src/screens/home_screen.dart';
 
 class App extends StatelessWidget {
@@ -14,7 +14,9 @@ class App extends StatelessWidget {
         primaryColor: Colors.grey,
       ),
       title: "New App",
-      home: CartProvider(child: HomeScreen()),
+      home: AppProvider(
+        child: HomeScreen(),
+      ),
     );
   }
 }
