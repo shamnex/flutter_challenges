@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:ramen_restaurant/src/blocs/app_bloc.dart';
 import 'package:ramen_restaurant/src/data/constants.dart';
@@ -19,7 +18,7 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   double screenHeight;
   double screenWidth;
 
-  double yStartPosition;
+  double yStartPosition; //
   double yEndPosition;
 
   double xStartPosition;
@@ -31,30 +30,50 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     viewportFraction: 0.7,
   );
 
-  AnimationController _animationController;
+  AnimationController _addToCardController;
+  AnimationController _fadeInController;
+  Animation<double> _fadeIn;
 
   @override
   void initState() {
     super.initState();
 
-    _animationController =
+    _addToCardController =
         AnimationController(vsync: this, duration: Duration(milliseconds: 500))
           ..addStatusListener((AnimationStatus status) {
             if (status == AnimationStatus.completed) {
-              _animationController.reset();
+              _addToCardController.reset();
             }
           });
+
+    _fadeInController = AnimationController(
+      vsync: this,
+      duration: Duration(
+        milliseconds: 500,
+      ),
+    );
+
+    _fadeIn = Tween(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _fadeInController,
+        curve: Curves.linear,
+      ),
+    );
+
+    _fadeInController.forward();
   }
 
   final List<Food> _foods = Food.getAllFoods();
 
   dispose() {
-    _animationController.dispose();
+    _addToCardController.dispose();
+    _fadeInController.dispose();
     _pageViewController.dispose();
     super.dispose();
   }
 
   Widget build(BuildContext context) {
+    
     final bloc = AppProvider.of(context);
     screenHeight = MediaQuery.of(context).size.height;
     screenWidth = MediaQuery.of(context).size.width;
@@ -93,7 +112,7 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         AddToCartAnimation(
           begin: Offset(xStartPosition, yStartPosition),
           end: Offset(xEndPosition, yEndPosition),
-          animationController: _animationController,
+          animationController: _addToCardController,
         ),
       ],
     );
@@ -103,7 +122,10 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        leading: BackButton(),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios),
+          onPressed: () {},
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0.0,
         centerTitle: true,
@@ -155,38 +177,50 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           StreamBuilder(
             stream: bloc.currentpage,
             builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
-              return PageView.builder(
-                controller: _pageViewController,
-                itemCount: _foods.length,
-                onPageChanged: (int pageNumber) =>
-                    bloc.setCurrentPage(pageNumber),
-                itemBuilder: (BuildContext context, int index) {
-                  final Food currentFood = _foods[index];
-                  return AnimatedBuilder(
-                    animation: _pageViewController,
-                    child: GestureDetector(
-                      onTap: null,
-                      child: FoodCard(
-                        food: currentFood,
-                        onAddToCart: (int quantity) async {
-                          await _animationController.forward();
-                          bloc.addItemsToCart(quantity);
-                        },
-                      ),
-                    ),
-                    builder: (BuildContext ctx, Widget child) {
-                      double value = 1.0;
 
-                      if (_pageViewController.position.haveDimensions) {
-                        value = _pageViewController.page - index;
-                        value = (1 - (value.abs() * .5)).clamp(0.0, 1.0);
-                      }
-                      return new Transform.scale(
-                        // scale: 1.0,
-                        scale: Curves.easeOut.transform(value) * 1 + 0.08,
-                        child: child,
-                      );
-                    },
+              return AnimatedBuilder(
+                animation: _fadeIn,
+                builder: (BuildContext context, Widget child) {
+
+                  return Opacity(
+                    opacity: _fadeIn.value,
+                    child: PageView.builder(
+                      controller: _pageViewController,
+                      itemCount: _foods.length,
+
+                      onPageChanged: (int pageNumber) =>  bloc.setCurrentPage(pageNumber),
+
+                      itemBuilder: (BuildContext context, int index) {
+                        final Food currentFood = _foods[index];
+                        return AnimatedBuilder(
+                          animation: _pageViewController,
+                          child: GestureDetector(
+                            onTap: null,
+                            child: FoodCard(
+                              food: currentFood,
+                              onAddToCart: (int quantity) async {
+                                await _addToCardController.forward();
+                                bloc.addItemsToCart(quantity);
+                              },
+                            ),
+                          ),
+                          builder: (BuildContext ctx, Widget child) {
+                            double value = 1.0;
+
+                            if (_pageViewController.position.haveDimensions) {
+                              value = _pageViewController.page - index;
+                              value = (1 - (value.abs() * .5)).clamp(0.0, 1.0);
+                            }
+                            return new Transform.scale(
+                              // scale: 1.0,
+                              scale: Curves.easeOut.transform(value) * 1 + 0.08,
+                              child: child,
+                            );
+                          },
+                        );
+                      },
+
+                    ),
                   );
                 },
               );
