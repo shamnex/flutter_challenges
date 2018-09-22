@@ -73,7 +73,6 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget build(BuildContext context) {
-    
     final bloc = AppProvider.of(context);
     screenHeight = MediaQuery.of(context).size.height;
     screenWidth = MediaQuery.of(context).size.width;
@@ -86,29 +85,20 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     return Stack(
       children: <Widget>[
-        Column(children: [
-          Expanded(
-            child: StreamBuilder(
-              stream: bloc.currentpage,
-              builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
-                if (!snapshot.hasData) {
-                  return Container(
-                    color: BGColors.all[0],
-                  );
-                }
-                return Container(
-                  color: BGColors.all[snapshot.data],
-                );
-              },
-            ),
+        //BACKGROUND ===============================
+        _buildBGAnimation(bloc),
+
+        ///sCAFFOLD //===============================
+        Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: buildAppBar(bloc),
+          body: Stack(
+            children: <Widget>[_buildSlider(bloc)],
           ),
-          Expanded(
-            child: Container(
-              color: Color(0xFFffffff),
-            ),
-          ),
-        ]),
-        _buildScaffold(context, bloc),
+        ),
+
+        //ADD TO Cart ANimation //===============================
+
         AddToCartAnimation(
           begin: Offset(xStartPosition, yStartPosition),
           end: Offset(xEndPosition, yEndPosition),
@@ -118,116 +108,133 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildScaffold(context, AppBloc bloc) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios),
-          onPressed: () {},
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0.0,
-        centerTitle: true,
-        actions: <Widget>[
-          Stack(
-            alignment: Alignment.center,
-            children: <Widget>[
-              Container(
-                margin: const EdgeInsets.only(right: 16.0),
-                child: Icon(Icons.shopping_cart),
-              ),
-              Positioned(
-                top: 6.0,
-                right: 0.0,
-                child: StreamBuilder(
-                  stream: bloc.itemsInCart,
-                  builder: (ctx, AsyncSnapshot<int> snapshot) {
-                    if (snapshot.hasData) {
-                      return BounceInAnimation(
-                        replayable: true,
-                        child: Container(
-                          alignment: Alignment.center,
-                          width: 18.0,
-                          height: 18.0,
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle, color: AppColors.yellow),
-                          margin: const EdgeInsets.only(right: 10.0),
-                          child: Text(bloc.total.toString().toUpperCase(),
-                              style: TextStyle(
-                                  color: Colors.white, fontSize: 14.0)),
-                        ),
-                      );
-                    }
-                    return Container();
-                  },
-                ),
-              ),
-            ],
-          ),
-        ],
-        title: Text(
-          'TODAY\'S SPECIAL',
-          style: TextStyle(fontSize: 18.0, letterSpacing: 1.0),
+  Widget _buildBGAnimation(AppBloc bloc) {
+    return Column(children: [
+      Expanded(
+        child: StreamBuilder(
+          stream: bloc.currentpage,
+          builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+            if (!snapshot.hasData) {
+              return Container(
+                color: BGColors.all[0],
+              );
+            }
+            return Container(
+              color: BGColors.all[snapshot.data],
+            );
+          },
         ),
       ),
-      body: Stack(
-        children: <Widget>[
-          //main background
-          StreamBuilder(
-            stream: bloc.currentpage,
-            builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+      Expanded(
+        child: Container(
+          color: Color(0xFFffffff),
+        ),
+      ),
+    ]);
+  }
 
-              return AnimatedBuilder(
-                animation: _fadeIn,
-                builder: (BuildContext context, Widget child) {
+  Widget buildAppBar(AppBloc bloc) {
+    return AppBar(
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back_ios),
+        onPressed: () {},
+      ),
+      backgroundColor: Colors.transparent,
+      elevation: 0.0,
+      centerTitle: true,
+      actions: <Widget>[
+        Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            Container(
+              margin: const EdgeInsets.only(right: 16.0),
+              child: Icon(Icons.shopping_cart),
+            ),
+            Positioned(
+              top: 6.0,
+              right: 0.0,
+              child: StreamBuilder(
+                stream: bloc.itemsInCart,
+                builder: (ctx, AsyncSnapshot<int> snapshot) {
+                  if (snapshot.hasData) {
+                    return BounceInAnimation(
+                      replayable: true,
+                      child: Container(
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.yellow,
+                        ),
+                        margin: const EdgeInsets.only(right: 10.0),
+                        padding: const EdgeInsets.all(4.0),
+                        child: Text(bloc.total.toString().toUpperCase(),
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 12.0)),
+                      ),
+                    );
+                  }
+                  return Container();
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
+      title: Text(
+        'TODAY\'S SPECIAL',
+        style: TextStyle(fontSize: 18.0, letterSpacing: 1.0),
+      ),
+    );
+  }
 
-                  return Opacity(
-                    opacity: _fadeIn.value,
-                    child: PageView.builder(
-                      controller: _pageViewController,
-                      itemCount: _foods.length,
-
-                      onPageChanged: (int pageNumber) =>  bloc.setCurrentPage(pageNumber),
-
-                      itemBuilder: (BuildContext context, int index) {
-                        final Food currentFood = _foods[index];
-                        return AnimatedBuilder(
-                          animation: _pageViewController,
-                          child: GestureDetector(
-                            onTap: null,
-                            child: FoodCard(
-                              food: currentFood,
-                              onAddToCart: (int quantity) async {
-                                await _addToCardController.forward();
-                                bloc.addItemsToCart(quantity);
-                              },
-                            ),
-                          ),
-                          builder: (BuildContext ctx, Widget child) {
-                            double value = 1.0;
-
-                            if (_pageViewController.position.haveDimensions) {
-                              value = _pageViewController.page - index;
-                              value = (1 - (value.abs() * .5)).clamp(0.0, 1.0);
-                            }
-                            return new Transform.scale(
-                              // scale: 1.0,
-                              scale: Curves.easeOut.transform(value) * 1 + 0.08,
-                              child: child,
-                            );
-                          },
-                        );
-                      },
-
+  Widget _buildSlider(AppBloc bloc) {
+    return StreamBuilder(
+      stream: bloc.currentpage,
+      builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+        return AnimatedBuilder(
+          animation: _fadeIn,
+          builder: (BuildContext context, Widget child) {
+            return Opacity(
+              opacity: _fadeIn.value,
+              child: PageView.builder(
+                controller: _pageViewController,
+                itemCount: _foods.length,
+                onPageChanged: (int pageNumber) =>
+                    bloc.setCurrentPage(pageNumber),
+                itemBuilder: (BuildContext context, int index) {
+                  final Food currentFood = _foods[index];
+                  return AnimatedBuilder(
+                    animation: _pageViewController,
+                    child: GestureDetector(
+                      onTap: null,
+                      child: FoodCard(
+                        food: currentFood,
+                        onAddToCart: (int quantity) async {
+                          await _addToCardController.forward();
+                          bloc.addItemsToCart(quantity);
+                        },
+                      ),
                     ),
+                    builder: (BuildContext ctx, Widget child) {
+                      double value = 1.0;
+
+                      if (_pageViewController.position.haveDimensions) {
+                        value = _pageViewController.page - index;
+                        value = (1 - (value.abs() * .5)).clamp(0.0, 1.0);
+                      }
+                      return new Transform.scale(
+                        // scale: 1.0,
+                        scale: Curves.easeOut.transform(value) * 1 + 0.08,
+                        child: child,
+                      );
+                    },
                   );
                 },
-              );
-            },
-          ),
-        ],
-      ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

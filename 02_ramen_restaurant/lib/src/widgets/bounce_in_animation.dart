@@ -3,9 +3,15 @@ import 'package:flutter/material.dart';
 class BounceInAnimation extends StatefulWidget {
   final Widget _child;
   final bool _replayable;
-  BounceInAnimation({Key key, @required Widget child, bool replayable = false})
+  final Duration _duration;
+  BounceInAnimation(
+      {Key key,
+      @required Widget child,
+      bool replayable = false,
+      Duration duration})
       : _child = child,
         _replayable = replayable,
+        _duration = duration,
         super(key: key);
   @override
   BounceInAnimationState createState() {
@@ -22,7 +28,7 @@ class BounceInAnimationState extends State<BounceInAnimation>
   void initState() {
     controller = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 800),
+      duration: widget._duration ?? Duration(milliseconds: 800),
     );
 
     scale = Tween<double>(begin: 0.8, end: 1.0).animate(

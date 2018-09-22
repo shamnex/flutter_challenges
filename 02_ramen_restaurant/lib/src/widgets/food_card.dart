@@ -99,6 +99,9 @@ class FoodCardState extends State<FoodCard> {
             minHeight: 360.0,
           ),
           child: Container(
+            padding: EdgeInsets.symmetric(
+              vertical: 20.0,
+            ),
             decoration: BoxDecoration(
               color: Colors.white,
               boxShadow: [
@@ -136,7 +139,7 @@ class FoodCardState extends State<FoodCard> {
                       color: Colors.black,
                       borderRadius: BorderRadius.circular(30.0)),
                   child: Text(
-                    "₦${ widget.food.price}",
+                    "₦${widget.food.price}",
                     style: TextStyle(fontSize: 17.0, color: Colors.white),
                   ),
                 ),
@@ -148,25 +151,28 @@ class FoodCardState extends State<FoodCard> {
                       onPressed: _removeQuantity,
                     ),
                     Container(
-                      alignment: Alignment.center,
-                      height: 50.0,
-                      width: 80.0,
-                      // margin: EdgeInsets.all(10.0),
-                      padding: EdgeInsets.symmetric(
-                        vertical: 5.0,
-                        horizontal: 20.0,
-                      ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(4.0),
-                        border: Border.all(color: Colors.grey, width: 2.0),
-                        color: Colors.transparent,
-                      ),
-                      child: Text(
-                        _quantity.toString(),
-                        style: TextStyle(
-                            fontSize: 17.0, color: Colors.grey.shade900),
-                      ),
-                    ),
+                        alignment: Alignment.center,
+                        height: 50.0,
+                        width: 80.0,
+                        // margin: EdgeInsets.all(10.0),
+                        padding: EdgeInsets.symmetric(
+                          vertical: 5.0,
+                          horizontal: 20.0,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(4.0),
+                          border: Border.all(color: Colors.grey, width: 2.0),
+                          color: Colors.transparent,
+                        ),
+                        child: BounceInAnimation(
+                          replayable: true,
+                          duration: Duration(seconds: 1),
+                          child: Text(
+                            _quantity.toString(),
+                            style: TextStyle(
+                                fontSize: 17.0, color: Colors.grey.shade900),
+                          ),
+                        )),
                     IconButton(
                       icon: Icon(Icons.add),
                       onPressed: _addQuantity,
@@ -185,7 +191,7 @@ class FoodCardState extends State<FoodCard> {
         Transform(
           child: Image.asset(
             widget.food.image,
-            height: 100.0,
+            height: 130.0,
           ),
           transform: Matrix4.identity()..translate(0.0, -180.0),
         ),
