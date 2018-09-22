@@ -15,7 +15,7 @@ class Story {
   static List<Story> generate() {
     return [
       Story(
-        title: "Hikers gets killed by bears",
+        title: "Hikers get killed by bears",
         category: "hiking",
         image: StoryImages.one,
         places: 20,

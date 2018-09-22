@@ -93,7 +93,16 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           backgroundColor: Colors.transparent,
           appBar: buildAppBar(bloc),
           body: Stack(
-            children: <Widget>[_buildSlider(bloc)],
+            alignment: Alignment.center,
+            children: <Widget>[
+              _buildSlider(bloc),
+              Positioned(
+                bottom: 40.0,
+                child: Row(
+                  children: _buildIndicator(bloc),
+                ),
+              ),
+            ],
           ),
         ),
 
@@ -106,6 +115,32 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
       ],
     );
+  }
+
+  List<Widget> _buildIndicator(AppBloc bloc) {
+    final List<Widget> _ = [];
+    _foods.asMap().forEach(
+      (index, food) {
+        _.add(
+          StreamBuilder(
+            stream: bloc.currentpage,
+            builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+              int currentPage = snapshot.data ?? 0;
+
+              return Container(
+                margin: EdgeInsets.symmetric(horizontal: 7.0),
+                alignment: Alignment.center,
+                color: currentPage == index ? Colors.black : Colors.grey,
+                height: 3.0,
+                width: 15.0,
+              );
+            },
+          ),
+        );
+      },
+    );
+
+    return _;
   }
 
   Widget _buildBGAnimation(AppBloc bloc) {
