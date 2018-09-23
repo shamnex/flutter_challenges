@@ -32,10 +32,6 @@ class AddToCartAnimation extends StatelessWidget {
               0.0,
               0.05,
             ),
-            reverseCurve: Interval(
-              0.0,
-              1.0,
-            ),
           ),
         ),
         _sizeAnimation = Tween(
@@ -66,7 +62,7 @@ class AddToCartAnimation extends StatelessWidget {
                 width: _sizeAnimation.value,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.yellow,
+                  color: AppColors.accent,
                 ),
               ),
             ),

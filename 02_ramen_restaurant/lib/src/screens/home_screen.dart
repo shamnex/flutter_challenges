@@ -39,7 +39,7 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.initState();
 
     _addToCardController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 500))
+        AnimationController(vsync: this, duration: Duration(milliseconds: 400))
           ..addStatusListener((AnimationStatus status) {
             if (status == AnimationStatus.completed) {
               _addToCardController.reset();
@@ -147,15 +147,15 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Column(children: [
       Expanded(
         child: StreamBuilder(
-          stream: bloc.currentpage,
-          builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+          stream: bloc.bgColor,
+          builder: (BuildContext context, AsyncSnapshot<Color> snapshot) {
             if (!snapshot.hasData) {
               return Container(
                 color: BGColors.all[0],
               );
             }
             return Container(
-              color: BGColors.all[snapshot.data],
+              color: snapshot.data,
             );
           },
         ),
@@ -198,7 +198,7 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: AppColors.yellow,
+                          color: AppColors.accent,
                         ),
                         margin: const EdgeInsets.only(right: 10.0),
                         padding: const EdgeInsets.all(4.0),

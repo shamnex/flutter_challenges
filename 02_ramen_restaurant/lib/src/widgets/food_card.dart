@@ -219,7 +219,7 @@ class FoodCardState extends State<FoodCard> {
                     height: 60.0,
                     width: 80.0,
                     decoration: BoxDecoration(
-                      color: AppColors.yellow,
+                      color: AppColors.accent,
                       borderRadius: BorderRadius.circular(4.0),
                     ),
                     child: Icon(
