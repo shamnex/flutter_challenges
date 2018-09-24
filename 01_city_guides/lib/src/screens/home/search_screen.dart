@@ -178,6 +178,7 @@ class SearchScreenState extends State<SearchScreen>
                           ],
                         ),
                         child: TextField(
+                          autofocus: true,
                           keyboardType: TextInputType.text,
                           decoration: InputDecoration(
                             contentPadding: const EdgeInsets.symmetric(
