@@ -151,7 +151,7 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           builder: (BuildContext context, AsyncSnapshot<Color> snapshot) {
             if (!snapshot.hasData) {
               return Container(
-                color: BGColors.all[0],
+                color: BGColors.getAll()[0],
               );
             }
             return Container(
@@ -217,7 +217,7 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ],
       title: Text(
         'TODAY\'S SPECIAL',
-        style: TextStyle(fontSize: 18.0, letterSpacing: 1.0),
+        style: TextStyle(fontSize: 22.0, letterSpacing: 1.0),
       ),
     );
   }

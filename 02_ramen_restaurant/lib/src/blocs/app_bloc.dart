@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:ramen_restaurant/src/data/constants.dart';
 
 class AppBloc {
+  int _total = 0;
+  final List<Color> colors = BGColors.getAll();
+  int _bgColorIndex = 0;
+
+  //streams
   StreamController<int> _itemsInCart = StreamController<int>.broadcast();
   StreamController<int> _currentpage = StreamController<int>.broadcast();
   StreamController<Color> _bgColor = StreamController<Color>.broadcast();
-
-  int _total = 0;
-  int _previousColor = 0;
 
   //getters
   Stream<int> get itemsInCart => _itemsInCart.stream;
@@ -27,12 +29,12 @@ class AppBloc {
 
     _currentpage.stream.listen((_) {
       //get random Number
-      int _random = Random().nextInt(BGColors.all.length);
-      while (_random == _previousColor) {
-        _random = Random().nextInt(BGColors.all.length);
+      int _randomNumber = Random().nextInt(colors.length);
+      while (_randomNumber == _bgColorIndex) {
+        _randomNumber = Random().nextInt(colors.length);
       }
-      _bgColor.sink.add(BGColors.all[_random]);
-      _previousColor = _random;
+      _bgColor.sink.add(colors[_randomNumber]);
+      _bgColorIndex = _randomNumber;
     });
   }
 

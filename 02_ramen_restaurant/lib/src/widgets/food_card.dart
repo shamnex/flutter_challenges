@@ -49,19 +49,16 @@ class FoodCardState extends State<FoodCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Transform(
-      transform: Matrix4.identity()..translate(0.0, 30.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          buildCard(context),
-          Transform(
-            child: buildButton(),
-            transform: Matrix4.identity()..translate(0.0, -30.0),
-          ),
-          //buttton
-        ],
-      ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        buildCard(context),
+        Transform(
+          child: buildButton(),
+          transform: Matrix4.identity()..translate(0.0, -30.0),
+        ),
+        //buttton
+      ],
     );
   }
 

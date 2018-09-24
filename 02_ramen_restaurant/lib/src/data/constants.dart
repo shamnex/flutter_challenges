@@ -8,12 +8,14 @@ class AppColors {
 }
 
 class BGColors {
-  static List<Color> all = [
-    const Color(0xFFf2e8da),
-    const Color(0xFFefefe7),
-    const Color(0xFFd2da75),
-   const Color(0xFFf7f7f7),
-  ];
+  static List<Color> getAll() {
+    return [
+      const Color(0xFFf2e8da),
+      const Color(0xFFefefe7),
+      const Color(0xFFd2da75),
+      const Color(0xFFf7f7f7),
+    ];
+  }
 }
 
 class Images {

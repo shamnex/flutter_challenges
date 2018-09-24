@@ -13,7 +13,6 @@ class App extends StatelessWidget {
         iconTheme: IconThemeData(color: Colors.black),
         primaryColor: Colors.grey,
       ),
-      title: "New App",
       home: AppProvider(
         child: HomeScreen(),
       ),
