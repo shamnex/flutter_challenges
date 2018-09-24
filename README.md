@@ -15,3 +15,10 @@ Design made by **Jae-seong,**
 Designed by **Nina Maffey**
 
 [<img src="https://github.com/shamnex/flutter_challenges/blob/master/gifs/restaurant.gif">](https://www.uplabs.com/posts/today-s-special-ramen-restaurant-app)
+
+##Challenge 03  
+
+### [Tasks Manager](https://github.com/shamnex/flutter_challenges/tree/master/03_task_manager) (0% Done)
+Designed by **Cuberto**
+
+[<img src="https://github.com/shamnex/flutter_challenges/blob/master/gifs/tasks.gif">](https://dribbble.com/shots/4890285-Task-Manager-Animated)
