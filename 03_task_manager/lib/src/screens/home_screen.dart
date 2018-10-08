@@ -38,7 +38,7 @@ class HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: TMBottomAppBar(
-        onIndexChanged: (index) {
+        onIndexChanged: (int index) {
           setState(() {
             _currentScreen = _tabs[index];
           });

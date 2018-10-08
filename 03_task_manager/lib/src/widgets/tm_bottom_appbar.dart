@@ -39,7 +39,7 @@ class TMBottomAppBarState extends State<TMBottomAppBar> {
             foregroundDecoration: BoxDecoration(
               backgroundBlendMode: BlendMode.screen,
               gradient: new LinearGradient(
-                begin: Alignment(0.0, 0.0),
+                begin: Alignment(0.0, -0.6),
                 end: Alignment(0.00, 1.0),
                 colors: [
                   Colors.transparent,
@@ -56,7 +56,8 @@ class TMBottomAppBarState extends State<TMBottomAppBar> {
                 ),
               ),
             ),
-            height: screenHeight / 7.5,
+            height: screenHeight / 8,
+            // height: 60.0,
             child: Row(
               children: _buildItems(widget.items),
             ),
@@ -117,13 +118,13 @@ class TMButtomAppBarItem extends StatelessWidget {
           alignment: Alignment.center,
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              maxHeight: 25.0,
-              minHeight: 25.0,
+              maxHeight: 20.0,
+              minHeight: 20.0,
             ),
             child: Image.asset(
               assetIcon,
-              height: 25.0,
-              width: 25.0,
+              height: 20.0,
+              width: 20.0,
               color: isActive ? AppColors.black : AppColors.lightGrey,
             ),
           ),
