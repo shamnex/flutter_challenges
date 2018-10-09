@@ -19,9 +19,7 @@ class TasksTabState extends State<TasksTab>
 
   initState() {
     _controller = PageController(viewportFraction: 0.4, initialPage: 0);
-    _controller.addListener(() {
-      // print(_controller.offset);
-    });
+    _controller.addListener(() {});
 
     _animationController = AnimationController(
       vsync: this,
@@ -52,12 +50,9 @@ class TasksTabState extends State<TasksTab>
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.of(context).size.height;
 
-    print(MediaQuery.of(context).devicePixelRatio);
     // TODO: implement build
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        print(constraints.maxHeight);
-        print(constraints);
         return SafeArea(
           child: Container(
             child: Column(
@@ -75,37 +70,33 @@ class TasksTabState extends State<TasksTab>
                 ),
                 Expanded(
                   flex: 5,
-                  child: PageView.builder(
-                    itemCount: 10,
-                    onPageChanged: (int page) {
-                      _animationController.addStatusListener((status) async {
-                        if (status == AnimationStatus.completed) {
-                          _animationController.reverse();
-                        }
-                      });
+                  child: GestureDetector(
+                    onHorizontalDragStart: (DragStartDetails details) {},
+                    onHorizontalDragUpdate: (DragUpdateDetails details) {
+                      print('hello');
                     },
-                    controller: _controller,
-                    scrollDirection: Axis.horizontal,
-                    itemBuilder: (BuildContext context, int index) {
-                      return AnimatedBuilder(
-                        
-                        animation: _animationController,
-                        builder: (BuildContext context, Widget child) {
-                          double value = 1.0;
+                    onHorizontalDragEnd: (DragEndDetails details) {
+                      print('hello');
+                    },
+                    child: PageView.builder(
+                      pageSnapping: true,
+                      itemCount: 10,
+                      onPageChanged: (int page) {
+                        _animationController.forward();
+                         
+                      },
+                      controller: _controller,
+                      scrollDirection: Axis.horizontal,
+                      itemBuilder: (BuildContext context, int index) {
+                        return AnimatedBuilder(
+                          animation: _animationController,
+                          builder: (BuildContext context, Widget child) {
 
-                          if (_controller.position.haveDimensions) {
-                            value = _controller.page - index;
-                            value = (1 - (value.abs() * .5)).clamp(0.0, 1.0);
-                          // _animationController.forward();
-                          }
 
-                          return new Transform.translate(
-                            // offset: bounce.value,
-                            offset: Offset(0.0, 0.0),
-                            child: AnimatedContainer(
+                            return AnimatedContainer(
                               curve: Curves.elasticIn,
                               // transform: Matrix4.identity()
-                              //   ..translate(value * 20),
+                              //   ..translate(bounce.value * 20),
                               duration: Duration(
                                 milliseconds: 200,
                               ),
@@ -116,11 +107,11 @@ class TasksTabState extends State<TasksTab>
                               margin: EdgeInsets.symmetric(horizontal: 8.0),
                               padding: EdgeInsets.all(20.0),
                               child: Text("data"),
-                            ),
-                          );
-                        },
-                      );
-                    },
+                            );
+                          },
+                        );
+                      },
+                    ),
                   ),
                 ),
                 SizedBox(height: screenHeight / 20),
@@ -218,46 +209,3 @@ class TasksTabState extends State<TasksTab>
     );
   }
 }
-
-// class ScrollSimulation extends Simulation {
-//   final double initPosition;
-//   final double velocity;
-
-//   ScrollSimulation({this.initPosition, this.velocity});
-
-//   @override
-//   double x(double time) {
-//     var max =
-//         math.max(math.min(initPosition, 0.0), initPosition + velocity * time);
-//     print(max);
-//     return max;
-//   }
-
-//   @override
-//   double dx(double time) {
-//     print(velocity);
-//     return velocity;
-//     // TODO: implement dx
-//   }
-
-//   @override
-//   bool isDone(double time) {
-//     return false;
-//   } // TODO: implement isDone
-// }
-
-// class CustomScrollPhysics extends ScrollPhysics {
-//   @override
-//   ScrollPhysics applyTo(ScrollPhysics ancestor) {
-//     return CustomScrollPhysics();
-//   }
-
-//   @override
-//   Simulation createBallisticSimulation(
-//       ScrollMetrics position, double velocity) {
-//     return ScrollSimulation(
-//       initPosition: position.pixels,
-//       velocity: velocity,
-//     );
-//   }
-// }
