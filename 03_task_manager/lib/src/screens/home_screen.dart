@@ -4,6 +4,7 @@ import 'package:tasks_manager/src/data/constants.dart';
 import 'package:tasks_manager/src/screens/tabs/burger_tab.dart';
 import 'package:tasks_manager/src/screens/tabs/calendar_tab.dart';
 import 'package:tasks_manager/src/screens/tabs/tasks_tab.dart';
+import 'package:tasks_manager/src/utils/screen_util.dart';
 import 'package:tasks_manager/src/widgets/tm_bottom_appbar.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -28,6 +29,12 @@ class HomeScreenState extends State<HomeScreen> {
     super.initState();
   }
 
+  @override
+  void didChangeDependencies() {
+    ScreenUtil.instance = ScreenUtil(width: 375, height: 812)..init(context);
+    super.didChangeDependencies();
+  }
+
   final List<String> items = [
     AppIcons.home,
     AppIcons.calender,
@@ -36,6 +43,7 @@ class HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       bottomNavigationBar: TMBottomAppBar(
         onIndexChanged: (int index) {

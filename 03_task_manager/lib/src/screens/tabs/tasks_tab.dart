@@ -3,6 +3,10 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import "package:flutter/material.dart";
 import 'package:tasks_manager/src/data/constants.dart';
+import 'package:tasks_manager/src/utils/page_view_tranforms.dart';
+import 'package:tasks_manager/src/utils/screen_util.dart';
+import 'package:transformer_page_view/transformer_page_view.dart';
+import 'package:transformer_page_view/parallax.dart';
 
 class TasksTab extends StatefulWidget {
   @override
@@ -13,161 +17,165 @@ class TasksTab extends StatefulWidget {
 
 class TasksTabState extends State<TasksTab>
     with SingleTickerProviderStateMixin {
-  AnimationController _animationController;
-  Animation bounce;
   PageController _controller;
+  AnimationController _animationController;
+  Animation _moveLeft;
 
   initState() {
-    _controller = PageController(viewportFraction: 0.4, initialPage: 0);
-    _controller.addListener(() {});
+    super.initState();
 
     _animationController = AnimationController(
-      vsync: this,
-      duration: Duration(
-        milliseconds: 700,
-      ),
-    );
+        vsync: this,
+        duration: Duration(
+          milliseconds: 300,
+        ));
 
-    bounce = Tween<Offset>(
-      begin: Offset(
-        0.0,
-        0.0,
-      ),
-      end: Offset(
-        40.0,
-        0.0,
-      ),
-    ).animate(
+    _moveLeft = Tween(begin: 0.0, end: -100).animate(
       CurvedAnimation(
         parent: _animationController,
-        curve: Curves.bounceIn,
+        curve: Interval(
+          0.0,
+          1.0,
+          curve: Curves.ease,
+        ),
+        reverseCurve: Interval(
+          0.0,
+          1.0,
+          curve: Curves.easeOut,
+        ),
       ),
     );
 
-    super.initState();
+    _controller = PageController(
+      initialPage: 1,
+      viewportFraction: 0.35,
+      keepPage: false,
+    )..addListener(() {
+        print(_controller.page);
+      });
   }
 
   Widget build(BuildContext context) {
-    final double screenHeight = MediaQuery.of(context).size.height;
-
-    // TODO: implement build
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         return SafeArea(
-          child: Container(
-            child: Column(
-              children: [
-                Expanded(
-                  flex: 6,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      _buildAppBar(screenHeight),
-                      _buildTitle(),
-                      _buildAddButton(),
-                    ],
+          child: Column(
+            children: [
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    _buildAppBar(),
+                    _buildTitle(),
+                    _buildAddButton(),
+                  ],
+                ),
+              ),
+              Container(
+                transform: Matrix4.identity()..translate(0.0),
+                height: ScreenUtil().setSp(270),
+                child: OverflowBox(
+                  minWidth: ScreenUtil.screenWidthDp + 100,
+                  maxWidth: ScreenUtil.screenWidthDp + 100,
+                  alignment: Alignment.centerLeft,
+                  child: PageView.custom(
+                    controller: _controller,
+                    pageSnapping: true,
+                    onPageChanged: (page) {
+                      print(page);
+                      if (page == 0) {
+                        _controller.animateToPage(1,
+                            curve: Curves.easeIn,
+                            duration: Duration(milliseconds: 400));
+                      }
+                    },
+                    childrenDelegate:
+                        SliverChildBuilderDelegate((context, int) {
+                      if (int == 0) {
+                        return Container();
+                      }
+                      return Transform.translate(
+                        offset:
+                            Offset(-ScreenUtil.screenWidthDp * .35 + 20.0, 0),
+                        child: TasksCard(
+                          items: [
+                            new TaskItem(
+                              isCompleted: true,
+                            ),
+                            new TaskItem(),
+                            new TaskItem(),
+                            new TaskItem(),
+                          ],
+                        ),
+                      );
+                    }),
                   ),
                 ),
-                Expanded(
-                  flex: 5,
-                  child: GestureDetector(
-                    onHorizontalDragStart: (DragStartDetails details) {},
-                    onHorizontalDragUpdate: (DragUpdateDetails details) {
-                      print('hello');
-                    },
-                    onHorizontalDragEnd: (DragEndDetails details) {
-                      print('hello');
-                    },
-                    child: PageView.builder(
-                      pageSnapping: true,
-                      itemCount: 10,
-                      onPageChanged: (int page) {
-                        _animationController.forward();
-                         
-                      },
-                      controller: _controller,
-                      scrollDirection: Axis.horizontal,
-                      itemBuilder: (BuildContext context, int index) {
-                        return AnimatedBuilder(
-                          animation: _animationController,
-                          builder: (BuildContext context, Widget child) {
-
-
-                            return AnimatedContainer(
-                              curve: Curves.elasticIn,
-                              // transform: Matrix4.identity()
-                              //   ..translate(bounce.value * 20),
-                              duration: Duration(
-                                milliseconds: 200,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.red,
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                              margin: EdgeInsets.symmetric(horizontal: 8.0),
-                              padding: EdgeInsets.all(20.0),
-                              child: Text("data"),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                SizedBox(height: screenHeight / 20),
-              ],
-            ),
+              ),
+              SizedBox(height: ScreenUtil().setSp(10)),
+            ],
           ),
         );
       },
     );
   }
 
-  Widget _buildAppBar(double screenHeight) {
-    return Container(
-      alignment: Alignment.centerLeft,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 30.0,
-      ),
-      child: Image.asset(
-        AppImages.logo,
-        height: 25.0,
-      ),
+  Widget _buildAppBar() {
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return Container(
+          alignment: Alignment.centerLeft,
+          padding: EdgeInsets.symmetric(
+            horizontal: ScreenUtil().setSp(20),
+          ),
+          child: Image.asset(
+            AppImages.logo,
+            height: ScreenUtil().setSp(20),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildTitle() {
     return Container(
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Expanded(
+          Flexible(
+            flex: 1,
             child: Divider(
-              color: Colors.black,
+              height: ScreenUtil().setSp(1) / 2,
+              color: AppColors.lightGrey,
             ),
           ),
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 40.0),
-            child: RichText(
-              text: TextSpan(
-                text: "Tasks",
-                style: TextStyle(
-                  color: AppColors.black,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 26.0,
+          Flexible(
+            flex: 4,
+            child: Container(
+              child: RichText(
+                text: TextSpan(
+                  text: "Tasks",
+                  style: TextStyle(
+                    color: AppColors.black,
+                    fontWeight: FontWeight.w900,
+                    fontSize: ScreenUtil().setSp(28),
+                  ),
+                  children: [
+                    TextSpan(
+                        text: " Lists",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w300,
+                            color: AppColors.lightGrey))
+                  ],
                 ),
-                children: [
-                  TextSpan(
-                      text: " Lists",
-                      style: TextStyle(
-                          fontWeight: FontWeight.w300,
-                          color: AppColors.lightGrey))
-                ],
               ),
             ),
           ),
-          Expanded(
+          Flexible(
+            flex: 1,
             child: Divider(
-              color: Colors.black,
+              height: ScreenUtil().setSp(1) / 2,
+              color: AppColors.lightGrey,
             ),
           ),
         ],
@@ -180,6 +188,9 @@ class TasksTabState extends State<TasksTab>
       children: <Widget>[
         Container(
           child: Container(
+            alignment: Alignment.center,
+            height: ScreenUtil().setSp(50),
+            width: ScreenUtil().setSp(50),
             child: CupertinoButton(
               padding: EdgeInsets.all(6.0),
               onPressed: () {},
@@ -191,9 +202,7 @@ class TasksTabState extends State<TasksTab>
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(3.0),
               border: Border.all(
-                color: AppColors.lightGrey,
-                width: 0.8,
-              ),
+                  color: AppColors.lightGrey, width: ScreenUtil().setSp(1) / 2),
             ),
           ),
         ),
@@ -202,7 +211,111 @@ class TasksTabState extends State<TasksTab>
           "Add List",
           style: TextStyle(
             color: AppColors.lightGrey,
-            fontSize: 14.0,
+            fontSize: ScreenUtil().setSp(12),
+          ),
+        )
+      ],
+    );
+  }
+}
+
+class TasksCard extends StatelessWidget {
+  const TasksCard({Key key, @required this.items}) : super(key: key);
+
+  final List<TaskItem> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        height: ScreenUtil().setSp(270),
+        padding: EdgeInsets.fromLTRB(
+            ScreenUtil().setSp(30),
+            ScreenUtil().setSp(50),
+            ScreenUtil().setSp(0),
+            ScreenUtil().setSp(20)),
+        margin: EdgeInsets.symmetric(horizontal: ScreenUtil().setSp(6)),
+        width: ScreenUtil().setSp(150),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+            color: Colors.red),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              "My Tasks",
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: ScreenUtil().setSp(16),
+                  fontWeight: FontWeight.w700),
+            ),
+            Divider(
+              color: Colors.white,
+              height: ScreenUtil().setSp(30),
+            ),
+          ]..addAll(items),
+        ));
+  }
+}
+
+class TaskItem extends StatelessWidget {
+  const TaskItem({
+    this.isCompleted = false,
+    Key key,
+  }) : super(key: key);
+
+  final bool isCompleted;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: <Widget>[
+        Opacity(
+          opacity: isCompleted ? 0.4 : 1.0,
+          child: Container(
+            margin: EdgeInsets.symmetric(vertical: ScreenUtil().setSp(10)),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Container(
+                  height: ScreenUtil().setSp(14),
+                  width: ScreenUtil().setSp(14),
+                  decoration: BoxDecoration(
+                      border: Border.all(
+                        color: isCompleted ? Colors.transparent : Colors.white,
+                        width: ScreenUtil().setSp(1),
+                      ),
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(
+                          ScreenUtil().setSp(3),
+                        ),
+                      )),
+                ),
+                SizedBox(
+                  width: ScreenUtil().setSp(10),
+                ),
+                Flexible(
+                  child: Text(
+                    "Buy Milk",
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: ScreenUtil().setSp(13),
+                        fontWeight: FontWeight.w500),
+                  ),
+                ),
+                SizedBox(
+                  width: 10.0,
+                ),
+              ],
+            ),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.only(right: ScreenUtil().setSp(20)),
+          child: Divider(
+            color: isCompleted ? Colors.white : Colors.transparent,
           ),
         )
       ],

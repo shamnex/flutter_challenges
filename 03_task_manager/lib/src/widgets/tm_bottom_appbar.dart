@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tasks_manager/src/data/constants.dart';
+import 'package:tasks_manager/src/utils/screen_util.dart';
 
 class TMBottomAppBar extends StatefulWidget {
   final List<String> items;
@@ -23,47 +24,52 @@ class TMBottomAppBarState extends State<TMBottomAppBar> {
   @override
   void initState() {
     currentIndex = 0;
-    // TODO: implement initState
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    return BottomAppBar(
-      elevation: 0.0,
-      color: Colors.white,
-      child: Builder(
-        builder: (BuildContext context) {
-          return Container(
-            foregroundDecoration: BoxDecoration(
-              backgroundBlendMode: BlendMode.screen,
-              gradient: new LinearGradient(
-                begin: Alignment(0.0, -0.6),
-                end: Alignment(0.00, 1.0),
-                colors: [
-                  Colors.transparent,
-                  Colors.white.withOpacity(0.7),
-                  Colors.white,
-                ],
-              ),
-            ),
-            decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(
-                  width: 0.8,
-                  color: AppColors.lightGrey,
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return BottomAppBar(
+          elevation: 0.0,
+          color: Colors.white,
+          child: Builder(
+            builder: (BuildContext context) {
+              return Container(
+                foregroundDecoration: BoxDecoration(
+                  backgroundBlendMode: BlendMode.screen,
+                  gradient: new LinearGradient(
+                    begin: Alignment(0.0, -0.6),
+                    end: Alignment(0.00, 1.0),
+                    colors: [
+                      Colors.transparent,
+                      Colors.white.withOpacity(0.3),
+                      Colors.white,
+                      Colors.white,
+                    ],
+                  ),
                 ),
-              ),
-            ),
-            height: screenHeight / 8,
-            // height: 60.0,
-            child: Row(
-              children: _buildItems(widget.items),
-            ),
-          );
-        },
-      ),
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                      width: ScreenUtil().setSp(1) / 2,
+                      color: AppColors.lightGrey,
+                    ),
+                  ),
+                ),
+                height: constraints.maxHeight < 650
+                    ? ScreenUtil().setSp(60)
+                    : ScreenUtil().setSp(80),
+
+                child: Row(
+                  children: _buildItems(widget.items),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -107,31 +113,23 @@ class TMButtomAppBarItem extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             color:
-                isActive ? AppColors.lightGrey.withOpacity(0.1) : Colors.white,
+                isActive ? AppColors.lightGrey.withOpacity(0.15) : Colors.white,
             border: Border(
               right: BorderSide(
-                width: 0.8,
+                width: ScreenUtil().setSp(1) / 2,
                 color: AppColors.lightGrey,
               ),
             ),
           ),
           alignment: Alignment.center,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: 20.0,
-              minHeight: 20.0,
-            ),
-            child: Image.asset(
-              assetIcon,
-              height: 20.0,
-              width: 20.0,
-              color: isActive ? AppColors.black : AppColors.lightGrey,
-            ),
+          child: Image.asset(
+            assetIcon,
+            height: ScreenUtil().setSp(15),
+            width: ScreenUtil().setSp(15),
+            color: AppColors.black,
           ),
         ),
       ),
     );
   }
 }
-
-
